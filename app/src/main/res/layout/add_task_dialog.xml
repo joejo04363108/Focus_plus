@@ -69,9 +69,9 @@
             android:id="@+id/date_time_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="輸入日期與時間"
+            android:hint="選擇日期"
             android:focusable="false"
-            android:inputType="datetime" />
+            android:clickable="true" />
 
         <!-- 內容輸入 -->
         <TextView

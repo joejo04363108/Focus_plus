@@ -19,6 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.DatePickerDialog;
+import android.widget.DatePicker;
+
+import java.util.Calendar;
+
 public class Notes extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -71,6 +76,9 @@ public class Notes extends AppCompatActivity {
         EditText dateTimeInput = dialogView.findViewById(R.id.date_time_input);
         EditText contentInput = dialogView.findViewById(R.id.content_input);
 
+        // 日期選擇器功能
+        dateTimeInput.setOnClickListener(v -> showDatePicker(dateTimeInput));
+
         // 按鈕功能
         Button cancelButton = dialogView.findViewById(R.id.cancel_button);
         Button confirmButton = dialogView.findViewById(R.id.confirm_button);
@@ -92,7 +100,7 @@ public class Notes extends AppCompatActivity {
             }
 
             // 檢查輸入資料是否有效
-            if (!title.isEmpty() && !type.isEmpty() && !dateTime.isEmpty() && !content.isEmpty()) {
+            if (!title.isEmpty() && !type.isEmpty() && !dateTime.isEmpty()) {
                 // 新增到清單中
                 noteList.add(new NoteItem(title, type, dateTime, content));
                 noteAdapter.notifyDataSetChanged();
@@ -101,8 +109,24 @@ public class Notes extends AppCompatActivity {
                 // 提示使用者填寫完整資料
                 titleInput.setError("請填寫標題");
                 dateTimeInput.setError("請填寫日期與時間");
-                contentInput.setError("請填寫內容");
             }
         });
+    }
+    private void showDatePicker(EditText dateInput) {
+        // 取得目前日期
+        final Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        // 建立日期選擇器
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, selectedYear, selectedMonth, selectedDay) -> {
+                    // 更新輸入欄位文字
+                    String selectedDate = selectedYear + "/" + (selectedMonth + 1) + "/" + selectedDay;
+                    dateInput.setText(selectedDate);
+                }, year, month, day);
+
+        datePickerDialog.show();
     }
 }

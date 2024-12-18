@@ -5,8 +5,7 @@
     android:orientation="vertical"
     android:padding="8dp"
     android:background="#FFFFFF"
-    android:elevation="2dp"
-    android:marginBottom="8dp">
+    android:elevation="2dp">
 
     <!-- 標題 -->
     <TextView

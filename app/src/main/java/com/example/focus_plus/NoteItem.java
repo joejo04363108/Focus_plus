@@ -8,19 +8,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class NoteItem extends AppCompatActivity {
+public class NoteItem {
 
     private String title;
     private String type;
     private String dateTime;
     private String content;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.note_item);
 
-    }
     public NoteItem(String title, String type, String dateTime, String content) {
         this.title = title;
         this.type = type;
@@ -28,9 +22,9 @@ public class NoteItem extends AppCompatActivity {
         this.content = content;
     }
 
-    /*public String getTitle() {
+    public String getTitle() {
         return title;
-    }*/
+    }
 
     public String getType() {
         return type;
