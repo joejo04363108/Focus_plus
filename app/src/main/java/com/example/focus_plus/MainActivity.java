@@ -1,5 +1,6 @@
 package com.example.focus_plus;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -12,7 +13,13 @@ import java.util.Date;
 import java.util.Locale;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -22,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView dateTextView;
     private Handler handler = new Handler();
     private Runnable timeUpdater;
+    private FloatingActionButton fab;
+    private Button b1,b2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
         timeTextView = findViewById(R.id.timeTextView);
         dateTextView = findViewById(R.id.dateTextView);
+        fab = findViewById(R.id.fab);
+        b1 = findViewById(R.id.class_btn);
+        b2 = findViewById(R.id.note_btn);
 
         // 定時更新時間
         timeUpdater = new Runnable() {
@@ -40,6 +52,23 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         handler.post(timeUpdater);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent tmt = new Intent(MainActivity.this,tomato.class);
+
+                startActivity(tmt);
+            }
+        });
+
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
     }
 
     /*private void updateTime() {

@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Focus_plus"
         tools:targetApi="31">
         <activity
+            android:name=".NoteItem"
+            android:exported="false" />
+        <activity
             android:name=".tomato"
             android:exported="false" />
         <activity
