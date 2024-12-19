@@ -29,6 +29,9 @@ import java.util.Locale;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 
 public class Notes extends AppCompatActivity {
@@ -78,6 +81,7 @@ public class Notes extends AppCompatActivity {
     }
 
     private void showAddTaskDialog() {
+        // 彈出新增任務的對話框
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.add_task_dialog, null);
@@ -87,15 +91,24 @@ public class Notes extends AppCompatActivity {
         dialog.show();
 
         EditText titleInput = dialogView.findViewById(R.id.title_input);
-        RadioGroup typeRadioGroup = dialogView.findViewById(R.id.type_radioGroup);
         EditText dateTimeInput = dialogView.findViewById(R.id.date_time_input);
         EditText contentInput = dialogView.findViewById(R.id.content_input);
+        Spinner typeSpinner = dialogView.findViewById(R.id.type_spinner);
 
-        Button cancelButton = dialogView.findViewById(R.id.cancel_button);
-        Button confirmButton = dialogView.findViewById(R.id.confirm_button);
+        // 設置 Spinner 選項
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+                R.array.note_categories, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeSpinner.setAdapter(spinnerAdapter);
+
 
         // 日期與時間選擇器
         dateTimeInput.setOnClickListener(v -> showDateTimePicker(dateTimeInput));
+
+        //cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        Button cancelButton = dialogView.findViewById(R.id.cancel_button);
+        Button confirmButton = dialogView.findViewById(R.id.confirm_button);
 
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
@@ -103,24 +116,20 @@ public class Notes extends AppCompatActivity {
             String title = titleInput.getText().toString().trim();
             String dateTime = dateTimeInput.getText().toString().trim();
             String content = contentInput.getText().toString().trim();
-            String type = "";
-
-            int selectedTypeId = typeRadioGroup.getCheckedRadioButtonId();
-            if (selectedTypeId != -1) {
-                RadioButton selectedTypeButton = dialogView.findViewById(selectedTypeId);
-                type = selectedTypeButton.getText().toString();
-            }
+            String type = typeSpinner.getSelectedItem().toString();
 
             if (!title.isEmpty() && !type.isEmpty() && !dateTime.isEmpty()) {
                 noteList.add(new NoteItem(title, type, dateTime, content));
-                noteAdapter.notifyDataSetChanged();
-                saveNotes();
+                //filterNotes("全部"); // 更新清單
                 dialog.dismiss();
             } else {
-                Toast.makeText(this, "請填寫完整資訊", Toast.LENGTH_SHORT).show();
+                // 提示用戶填寫完整資料
+                if (title.isEmpty()) titleInput.setError("請填寫標題");
+                if (dateTime.isEmpty()) dateTimeInput.setError("請填寫日期與時間");
             }
         });
     }
+
 
     private void showDateTimePicker(EditText dateTimeInput) {
         final Calendar calendar = Calendar.getInstance();
@@ -177,4 +186,6 @@ public class Notes extends AppCompatActivity {
     public void onBackPressed() {
         saveAndReturn(); // 按返回鍵時保存數據
     }
+
+
 }

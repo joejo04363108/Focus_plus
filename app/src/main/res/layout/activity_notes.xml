@@ -37,9 +37,10 @@
             android:id="@+id/filter_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/filter_options"
-            android:layout_marginEnd="8dp"
-            android:background="@android:drawable/btn_dropdown" />
+            android:layout_gravity="center"
+            android:entries="@array/note_categories"
+            android:spinnerMode="dropdown" />
+
 
         <!-- 新增按鈕 -->
         <ImageButton
