@@ -2,6 +2,7 @@ package com.example.focus_plus;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,19 +11,18 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
-import android.app.DatePickerDialog;
-import android.widget.DatePicker;
-
-import java.util.Calendar;
 
 public class Notes extends AppCompatActivity {
 
@@ -30,38 +30,47 @@ public class Notes extends AppCompatActivity {
     private NoteAdapter noteAdapter;
     private List<NoteItem> noteList;
 
+    private static final String PREFS_NAME = "NotesPrefs";
+    private static final String NOTES_KEY = "noteList";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes);
 
-        // 初始化 RecyclerView
         recyclerView = findViewById(R.id.recyclerView_notes);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        noteList = new ArrayList<>();
+
+        noteList = loadNotes(); // 從 SharedPreferences 加載數據
+        if (noteList == null) {
+            noteList = new ArrayList<>();
+        }
+
         noteAdapter = new NoteAdapter(noteList);
         recyclerView.setAdapter(noteAdapter);
 
         // 返回按鈕
         ImageButton backButton = findViewById(R.id.back_btn);
-        backButton.setOnClickListener(v -> {
-            // 返回到 MainActivity
-            Intent intent = new Intent(Notes.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        backButton.setOnClickListener(v -> saveAndReturn());
 
         // 新增按鈕
         ImageButton addButton = findViewById(R.id.add_btn);
         addButton.setOnClickListener(v -> showAddTaskDialog());
+    }
 
-        noteList.add(new NoteItem("完成報告", "課業", "2024/12/20 18:00", "需要完成結案報告"));
-        noteList.add(new NoteItem("買菜", "生活", "2024/12/21 10:00", "購買下週的食材"));
-        noteAdapter.notifyDataSetChanged();
+    private void saveAndReturn() {
+        saveNotes(); // 保存數據到 SharedPreferences
+
+        // 將筆記列表作為 JSON 字符串返回給 MainActivity
+        Intent intent = new Intent();
+        Gson gson = new Gson();
+        String noteListJson = gson.toJson(noteList);
+        intent.putExtra("noteList", noteListJson);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     private void showAddTaskDialog() {
-        // 建立彈出視窗
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.add_task_dialog, null);
@@ -70,63 +79,58 @@ public class Notes extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // 初始化彈窗中的元件
         EditText titleInput = dialogView.findViewById(R.id.title_input);
         RadioGroup typeRadioGroup = dialogView.findViewById(R.id.type_radioGroup);
         EditText dateTimeInput = dialogView.findViewById(R.id.date_time_input);
         EditText contentInput = dialogView.findViewById(R.id.content_input);
 
-        // 日期選擇器功能
-        dateTimeInput.setOnClickListener(v -> showDatePicker(dateTimeInput));
-
-        // 按鈕功能
         Button cancelButton = dialogView.findViewById(R.id.cancel_button);
         Button confirmButton = dialogView.findViewById(R.id.confirm_button);
 
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         confirmButton.setOnClickListener(v -> {
-            // 收集使用者輸入的資料
             String title = titleInput.getText().toString().trim();
             String dateTime = dateTimeInput.getText().toString().trim();
             String content = contentInput.getText().toString().trim();
             String type = "";
 
-            // 確認選擇的類別
             int selectedTypeId = typeRadioGroup.getCheckedRadioButtonId();
             if (selectedTypeId != -1) {
                 RadioButton selectedTypeButton = dialogView.findViewById(selectedTypeId);
                 type = selectedTypeButton.getText().toString();
             }
 
-            // 檢查輸入資料是否有效
-            if (!title.isEmpty() && !type.isEmpty() && !dateTime.isEmpty()) {
-                // 新增到清單中
+            if (!title.isEmpty() && !type.isEmpty() /*&& !dateTime.isEmpty()*/) {
                 noteList.add(new NoteItem(title, type, dateTime, content));
                 noteAdapter.notifyDataSetChanged();
+                saveNotes(); // 保存數據到 SharedPreferences
                 dialog.dismiss();
             } else {
-                // 提示使用者填寫完整資料
-                titleInput.setError("請填寫標題");
-                dateTimeInput.setError("請填寫日期與時間");
+                Toast.makeText(this, "請填寫完整資訊", Toast.LENGTH_SHORT).show();
             }
         });
     }
-    private void showDatePicker(EditText dateInput) {
-        // 取得目前日期
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        // 建立日期選擇器
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                (view, selectedYear, selectedMonth, selectedDay) -> {
-                    // 更新輸入欄位文字
-                    String selectedDate = selectedYear + "/" + (selectedMonth + 1) + "/" + selectedDay;
-                    dateInput.setText(selectedDate);
-                }, year, month, day);
+    private void saveNotes() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String noteListJson = gson.toJson(noteList);
+        editor.putString(NOTES_KEY, noteListJson);
+        editor.apply();
+    }
 
-        datePickerDialog.show();
+    private List<NoteItem> loadNotes() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Gson gson = new Gson();
+        String noteListJson = sharedPreferences.getString(NOTES_KEY, null);
+        Type listType = new TypeToken<List<NoteItem>>() {}.getType();
+        return gson.fromJson(noteListJson, listType);
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveAndReturn(); // 按返回鍵時保存數據
     }
 }

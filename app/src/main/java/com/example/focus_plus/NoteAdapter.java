@@ -12,7 +12,7 @@ import java.util.List;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder> {
 
-    private List<NoteItem> noteList;
+    private final List<NoteItem> noteList;
 
     public NoteAdapter(List<NoteItem> noteList) {
         this.noteList = noteList;
@@ -21,20 +21,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
     @NonNull
     @Override
     public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // 載入單項目布局
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.note_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_item, parent, false);
         return new NoteViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull NoteViewHolder holder, int position) {
-        // 綁定資料到視圖
         NoteItem note = noteList.get(position);
-        holder.titleText.setText(note.getTitle());
-        holder.typeText.setText(note.getType());
-        holder.dateTimeText.setText(note.getDateTime());
-        holder.contentText.setText(note.getContent());
+        holder.titleTextView.setText(note.getTitle());
+        holder.typeTextView.setText(note.getType());
+        holder.dateTextView.setText(note.getDateTime());
+        holder.contentTextView.setText(note.getContent());
     }
 
     @Override
@@ -42,16 +39,16 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         return noteList.size();
     }
 
-    // 自定義 ViewHolder 類別
     static class NoteViewHolder extends RecyclerView.ViewHolder {
-        TextView titleText, typeText, dateTimeText, contentText;
+
+        TextView titleTextView, typeTextView, dateTextView, contentTextView;
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleText = itemView.findViewById(R.id.note_title);
-            typeText = itemView.findViewById(R.id.note_type);
-            dateTimeText = itemView.findViewById(R.id.note_date_time);
-            contentText = itemView.findViewById(R.id.note_content);
+            titleTextView = itemView.findViewById(R.id.note_title);
+            typeTextView = itemView.findViewById(R.id.note_type);
+            dateTextView = itemView.findViewById(R.id.note_date_time);
+            contentTextView = itemView.findViewById(R.id.note_content);
         }
     }
 }

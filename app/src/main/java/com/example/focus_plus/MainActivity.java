@@ -1,26 +1,26 @@
 package com.example.focus_plus;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import android.os.Bundle;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,7 +30,14 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Runnable timeUpdater;
     private FloatingActionButton fab;
-    private Button b1,b2;
+    private Button b2;
+    private RecyclerView recyclerView;
+
+    private NoteAdapter noteAdapter;
+    private List<NoteItem> noteList = new ArrayList<>();
+
+    private static final String PREFS_NAME = "NotePrefs";
+    private static final String NOTES_KEY = "notes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,51 +47,39 @@ public class MainActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.timeTextView);
         dateTextView = findViewById(R.id.dateTextView);
         fab = findViewById(R.id.fab);
-        b1 = findViewById(R.id.class_btn);
         b2 = findViewById(R.id.note_btn);
+        recyclerView = findViewById(R.id.recyclerView);
 
-        // 定時更新時間
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        noteAdapter = new NoteAdapter(noteList);
+        recyclerView.setAdapter(noteAdapter);
+
+        // 加載保存的筆記
+        loadNotes();
+
         timeUpdater = new Runnable() {
             @Override
             public void run() {
                 updateTimeAndDate();
-                handler.postDelayed(this, 1000); // 每秒更新一次
+                handler.postDelayed(this, 1000);
             }
         };
         handler.post(timeUpdater);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent tmt = new Intent(MainActivity.this,tomato.class);
-
-                startActivity(tmt);
-            }
-        });
 
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent note = new Intent(MainActivity.this, Notes.class);
-                startActivity(note);
-
+                startActivityForResult(note, 1);
             }
         });
-
     }
 
-    /*private void updateTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-        String currentTime = sdf.format(new Date());
-        timeTextView.setText(currentTime);
-    }*/
     private void updateTimeAndDate() {
-        // 更新時間
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         String currentTime = timeFormat.format(new Date());
         timeTextView.setText(currentTime);
 
-        // 更新日期
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd EEEE", Locale.getDefault());
         String currentDate = dateFormat.format(new Date());
         dateTextView.setText(currentDate);
@@ -93,9 +88,47 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        handler.removeCallbacks(timeUpdater); // 停止更新
+        handler.removeCallbacks(timeUpdater);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            String noteListJson = data.getStringExtra("noteList");
+            if (noteListJson != null) {
+                Gson gson = new Gson();
+                Type listType = new TypeToken<List<NoteItem>>() {}.getType();
+                List<NoteItem> updatedNotes = gson.fromJson(noteListJson, listType);
+
+                noteList.clear();
+                noteList.addAll(updatedNotes);
+                noteAdapter.notifyDataSetChanged();
+
+                // 保存筆記清單
+                saveNotes();
+            }
+        }
+    }
+
+    private void saveNotes() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(noteList);
+        editor.putString(NOTES_KEY, json);
+        editor.apply();
+    }
+
+    private void loadNotes() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString(NOTES_KEY, null);
+        if (json != null) {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<NoteItem>>() {}.getType();
+            List<NoteItem> savedNotes = gson.fromJson(json, listType);
+            noteList.addAll(savedNotes);
+        }
     }
 }
-
-
-
