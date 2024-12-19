@@ -24,6 +24,13 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Calendar;
+import java.util.Locale;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+
+
 public class Notes extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -87,6 +94,9 @@ public class Notes extends AppCompatActivity {
         Button cancelButton = dialogView.findViewById(R.id.cancel_button);
         Button confirmButton = dialogView.findViewById(R.id.confirm_button);
 
+        // 日期與時間選擇器
+        dateTimeInput.setOnClickListener(v -> showDateTimePicker(dateTimeInput));
+
         cancelButton.setOnClickListener(v -> dialog.dismiss());
 
         confirmButton.setOnClickListener(v -> {
@@ -101,16 +111,50 @@ public class Notes extends AppCompatActivity {
                 type = selectedTypeButton.getText().toString();
             }
 
-            if (!title.isEmpty() && !type.isEmpty() /*&& !dateTime.isEmpty()*/) {
+            if (!title.isEmpty() && !type.isEmpty() && !dateTime.isEmpty()) {
                 noteList.add(new NoteItem(title, type, dateTime, content));
                 noteAdapter.notifyDataSetChanged();
-                saveNotes(); // 保存數據到 SharedPreferences
+                saveNotes();
                 dialog.dismiss();
             } else {
                 Toast.makeText(this, "請填寫完整資訊", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+    private void showDateTimePicker(EditText dateTimeInput) {
+        final Calendar calendar = Calendar.getInstance();
+
+        // 日期選擇器
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(year, month, dayOfMonth);
+
+                    // 時間選擇器
+                    TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                            (timeView, hourOfDay, minute) -> {
+                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                calendar.set(Calendar.MINUTE, minute);
+
+                                // 格式化日期和時間
+                                String selectedDateTime = new java.text.SimpleDateFormat(
+                                        "yyyy/MM/dd HH:mm", Locale.getDefault())
+                                        .format(calendar.getTime());
+                                dateTimeInput.setText(selectedDateTime);
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            true);
+
+                    timePickerDialog.show();
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+
+        datePickerDialog.show();
+    }
+
 
     private void saveNotes() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
