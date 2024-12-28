@@ -25,6 +25,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         return new NoteViewHolder(view);
     }
 
+    public void updateNotes(List<NoteItem> newNotes) {
+        noteList.clear();
+        noteList.addAll(newNotes);
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull NoteViewHolder holder, int position) {
         NoteItem note = noteList.get(position);
@@ -32,6 +38,25 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         holder.typeTextView.setText(note.getType());
         holder.dateTextView.setText(note.getDateTime());
         holder.contentTextView.setText(note.getContent());
+
+        // 長按事件
+        holder.itemView.setOnLongClickListener(v -> {
+            if (onItemLongClickListener != null) {
+                onItemLongClickListener.onItemLongClick(position); // 傳遞長按位置
+            }
+            return true;
+        });
+    }
+
+    // 新增長按監聽器接口
+    private OnItemLongClickListener onItemLongClickListener;
+
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        this.onItemLongClickListener = listener;
+    }
+
+    public interface OnItemLongClickListener {
+        void onItemLongClick(int position);
     }
 
     @Override

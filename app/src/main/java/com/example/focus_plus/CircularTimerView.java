@@ -89,4 +89,7 @@ public class CircularTimerView extends View {
         this.centerText = text;
         invalidate(); // 重繪
     }
+
+    public static class ReminderReceiver {
+    }
 }

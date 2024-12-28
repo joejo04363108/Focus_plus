@@ -42,9 +42,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="期限/時間:"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:text="提醒時間:"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/date_time_input"
@@ -83,14 +83,16 @@
                 android:id="@+id/cancel_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/theme_gray"
                 android:text="取消" />
 
             <Button
                 android:id="@+id/confirm_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="確定"
-                android:layout_marginStart="8dp" />
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@color/theme_gray"
+                android:text="確定" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

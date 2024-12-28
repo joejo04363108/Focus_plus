@@ -49,6 +49,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import android.os.CountDownTimer;
 
 public class Notes extends AppCompatActivity {
 
@@ -58,6 +59,7 @@ public class Notes extends AppCompatActivity {
 
     private static final String PREFS_NAME = "NotesPrefs";
     private static final String NOTES_KEY = "noteList";
+    private List<NoteItem> allNotes = new ArrayList<>(); // 保存所有的筆記數據
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +88,11 @@ public class Notes extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView_notes);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        noteList = loadNotes(); // 從 SharedPreferences 加載數據
+        noteList = loadNotes();
         if (noteList == null) {
             noteList = new ArrayList<>();
         }
+        allNotes = new ArrayList<>(noteList); // 初始化完整清單
 
         noteAdapter = new NoteAdapter(noteList);
         recyclerView.setAdapter(noteAdapter);
@@ -101,7 +104,44 @@ public class Notes extends AppCompatActivity {
         // 新增按鈕
         ImageButton addButton = findViewById(R.id.add_btn);
         addButton.setOnClickListener(v -> showAddTaskDialog());
+
+        noteAdapter.setOnItemLongClickListener(position -> showDeleteDialog(position));
+
+        Spinner filterSpinner = findViewById(R.id.filter_spinner);
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedCategory = parent.getItemAtPosition(position).toString();
+                filterNotes(selectedCategory);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // 預設顯示所有筆記
+                filterNotes("全部");
+            }
+        });
+
     }
+
+    private void showDeleteDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("刪除筆記");
+        builder.setMessage("確定要刪除此筆記嗎？");
+        builder.setPositiveButton("確定", (dialog, which) -> {
+            // 刪除選中筆記
+            NoteItem removedNote = noteList.get(position);
+            noteList.remove(position);          // 更新當前顯示的清單
+            allNotes.remove(removedNote);       // 從完整清單中刪除
+            noteAdapter.notifyItemRemoved(position);
+            saveNotes();                        // 保存到 SharedPreferences
+
+            Toast.makeText(this, "筆記已刪除", Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -168,13 +208,14 @@ public class Notes extends AppCompatActivity {
 
             if (!title.isEmpty() && !type.isEmpty() && !dateTime.isEmpty()) {
                 NoteItem newNote = new NoteItem(title, type, dateTime, content);
-                noteList.add(newNote);
 
-                // 設定提醒
-                setReminder(title, type, dateTime);
-
+                allNotes.add(newNote);  // 添加到完整清單
+                noteList.add(newNote);  // 更新當前顯示的清單
                 noteAdapter.notifyDataSetChanged();
                 saveNotes();
+
+                setReminder(title, type, dateTime);
+
                 dialog.dismiss();
             } else {
                 if (title.isEmpty()) titleInput.setError("請填寫標題");
@@ -182,41 +223,37 @@ public class Notes extends AppCompatActivity {
             }
         });
 
+
+
     }
 
     private void setReminder(String title, String type, String dateTime) {
         try {
             // 將日期時間字串轉換為毫秒數
             SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
-            Date date = dateTimeFormat.parse(dateTime);
-            if (date == null) throw new IllegalArgumentException("無法解析日期時間");
+            Date targetDate = dateTimeFormat.parse(dateTime);
+            if (targetDate == null) throw new IllegalArgumentException("無法解析日期時間");
 
-            long triggerTime = date.getTime();
-            long currentTime = System.currentTimeMillis();
+            long currentTime = System.currentTimeMillis(); // 當前時間
+            long triggerTime = targetDate.getTime(); // 設定的目標時間
+            long delay = triggerTime - currentTime; // 計算延遲時間（毫秒）
 
-            if (triggerTime > currentTime) {
-                Intent intent = new Intent(this, ReminderReceiver.class);
-                intent.putExtra("title", title);
-                intent.putExtra("type", type);
+            if (delay > 0) {
+                // 使用 CountDownTimer 進行倒數計時
+                new CountDownTimer(delay, 1000) { // 每秒更新一次
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        // 可選：顯示倒數時間（例如用於除錯或視覺化）
+                    }
 
-                // 使用唯一請求碼
-                int requestCode = (title + dateTime).hashCode();
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                        this,
-                        requestCode,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                );
+                    @Override
+                    public void onFinish() {
+                        // 倒數結束，觸發通知
+                        triggerNotification(title, type);
+                    }
+                }.start();
 
-                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                if (alarmManager != null) {
-                    alarmManager.setExact(
-                            AlarmManager.RTC_WAKEUP,
-                            triggerTime,
-                            pendingIntent
-                    );
-                    Toast.makeText(this, "提醒已設定: " + dateTime, Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(this, "提醒已設定，將在 " + delay / 1000 + " 秒後觸發", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "無法設定過去的時間提醒", Toast.LENGTH_SHORT).show();
             }
@@ -226,6 +263,32 @@ public class Notes extends AppCompatActivity {
         }
     }
 
+    private void triggerNotification(String title, String type) {
+        // 創建通知渠道 (Android 8.0+)
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "reminder_channel",
+                    "提醒通知",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("筆記提醒");
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        // 創建通知
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "reminder_channel")
+                .setSmallIcon(R.drawable.ic_focus) // 替換為你的圖示資源
+                .setContentTitle("提醒：" + title)
+                .setContentText("類別：" + type)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
+        // 發送通知
+        notificationManager.notify((title + type).hashCode(), builder.build());
+    }
 
     private void showDateTimePicker(EditText dateTimeInput) {
         final Calendar calendar = Calendar.getInstance();
@@ -265,18 +328,44 @@ public class Notes extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String noteListJson = gson.toJson(noteList);
+        String noteListJson = gson.toJson(allNotes); // 保存完整數據
         editor.putString(NOTES_KEY, noteListJson);
         editor.apply();
     }
+
 
     private List<NoteItem> loadNotes() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         Gson gson = new Gson();
         String noteListJson = sharedPreferences.getString(NOTES_KEY, null);
         Type listType = new TypeToken<List<NoteItem>>() {}.getType();
-        return gson.fromJson(noteListJson, listType);
+        List<NoteItem> notes = gson.fromJson(noteListJson, listType);
+
+        if (notes != null) {
+            allNotes.clear();
+            allNotes.addAll(notes); // 保存所有筆記
+        }
+        return notes != null ? notes : new ArrayList<>();
     }
+
+
+    private void filterNotes(String category) {
+        if (category.equals("全部")) {
+            // 顯示所有筆記
+            noteAdapter.updateNotes(allNotes);
+        } else {
+            // 基於 allNotes 進行篩選
+            List<NoteItem> filteredNotes = new ArrayList<>();
+            for (NoteItem note : allNotes) {
+                if (note.getType().equals(category)) {
+                    filteredNotes.add(note);
+                }
+            }
+            noteAdapter.updateNotes(filteredNotes);
+        }
+    }
+
+
 
     @Override
     public void onBackPressed() {

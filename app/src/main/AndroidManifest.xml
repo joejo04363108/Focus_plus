@@ -19,8 +19,7 @@
             android:exported="false" />
         <!-- 註冊 Receiver -->
         <receiver
-            android:name=".ReminderReceiver"
-            android:exported="false" /> <!-- exported 設為 false 增加安全性 -->
+            android:name=".ReminderReceiver"/>
         <!-- 註冊 Activity -->
         <activity
             android:name=".tomato"

@@ -17,9 +17,9 @@
         <!-- 返回鍵 -->
         <ImageButton
             android:id="@+id/back_btn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
+            android:layout_width="70dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_focus"
             android:contentDescription="Back Button" />
 
         <!-- 標題 -->
@@ -58,5 +58,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/top_bar"
+        android:background="@drawable/recyclerview_bg"
         android:padding="8dp" />
 </RelativeLayout>
