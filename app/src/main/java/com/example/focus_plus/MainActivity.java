@@ -73,6 +73,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(note, 1);
             }
         });
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent tmt = new Intent(MainActivity.this, tomato.class);
+                startActivity(tmt);
+            }
+        });
     }
 
     private void updateTimeAndDate() {
