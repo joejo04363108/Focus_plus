@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,6 +23,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+
+import com.google.firebase.database.FirebaseDatabase;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,9 +59,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         noteAdapter = new NoteAdapter(noteList);
         recyclerView.setAdapter(noteAdapter);
-
-        // 加載保存的筆記
-        loadNotes();
 
         timeUpdater = new Runnable() {
             @Override

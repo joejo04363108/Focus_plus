@@ -1,48 +1,10 @@
-/*package com.example.focus_plus;
-
-import android.app.AlertDialog;
-import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import java.util.ArrayList;
-
-public class curriculum extends AppCompatActivity {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_curriculum);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-    }
-}*/
-
 package com.example.focus_plus;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,12 +22,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class curriculum extends AppCompatActivity {
 
     private static final int COLUMN_COUNT = 5; // 星期一至星期五
     private static final int ROW_COUNT = 9;    // 9節課
+    private static final String PREFS_NAME = "CoursePrefs";
+    private static final String COURSES_KEY = "courses";
 
     private GridView gridViewSchedule;
     private ImageButton btnAddCourse;
@@ -84,8 +53,6 @@ public class curriculum extends AppCompatActivity {
 
         // 綁定返回按鈕
         ImageView focusIcon = findViewById(R.id.imageFocus);
-
-        // 返回主畫面
         focusIcon.setOnClickListener(v -> finish());
 
         // 初始化 GridView 資料 (僅包含課程欄位，節次不重複)
@@ -96,11 +63,14 @@ public class curriculum extends AppCompatActivity {
             }
         }
 
-        // 設定 Adapter (每格高度為 217px)
-        int gridItemHeight = 208; // 可根據需求調整高度
+        // 設定 Adapter (每格高度為 208px)
+        int gridItemHeight = 208;
         adapter = new CustomAdapter(this, gridData, gridItemHeight);
         gridViewSchedule.setNumColumns(COLUMN_COUNT);
         gridViewSchedule.setAdapter(adapter);
+
+        // 加載保存的課程
+        loadCourses();
 
         // 新增課程按鈕
         btnAddCourse.setOnClickListener(v -> showCourseDialog(-1));
@@ -199,28 +169,30 @@ public class curriculum extends AppCompatActivity {
                 return;
             }
 
-            if (!courseName.isEmpty() && startPeriod <= endPeriod) {
-                if (position == -1) {
-                    courseList.add(new Course(courseName, teacherName, location, dayOfWeek, startPeriod, endPeriod));
-                } else {
-                    Course course = courseList.get(position);
-                    course.update(courseName, teacherName, location, dayOfWeek, startPeriod, endPeriod);
-                }
-                updateScheduleDisplay();
-                dialog.dismiss();
+            if (position == -1) {
+                // 新增課程
+                courseList.add(new Course(courseName, teacherName, location, dayOfWeek, startPeriod, endPeriod));
+            } else {
+                // 修改課程
+                Course course = courseList.get(position);
+                course.update(courseName, teacherName, location, dayOfWeek, startPeriod, endPeriod);
             }
+
+            saveCourses(); // 保存課程列表
+            updateScheduleDisplay();
+            dialog.dismiss();
         });
 
         btnDelete.setOnClickListener(v -> {
             if (position != -1) {
                 courseList.remove(position);
+                saveCourses(); // 保存課程列表
                 updateScheduleDisplay();
                 dialog.dismiss();
             }
         });
 
         dialog.show();
-
     }
 
     /**
@@ -247,7 +219,35 @@ public class curriculum extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * 保存課程到 SharedPreferences
+     */
+    private void saveCourses() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(courseList);
+        editor.putString(COURSES_KEY, json);
+        editor.apply();
+    }
 
+    /**
+     * 從 SharedPreferences 加載課程
+     */
+    private void loadCourses() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String json = sharedPreferences.getString(COURSES_KEY, null);
+        if (json != null) {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Course>>() {}.getType();
+            List<Course> savedCourses = gson.fromJson(json, listType);
+
+            courseList.clear();
+            courseList.addAll(savedCourses);
+
+            updateScheduleDisplay();
+        }
+    }
 
     /**
      * 課程類別
@@ -330,7 +330,5 @@ public class curriculum extends AppCompatActivity {
 
             return view;
         }
-
-
     }
 }
