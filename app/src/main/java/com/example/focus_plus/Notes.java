@@ -253,7 +253,9 @@ public class Notes extends AppCompatActivity {
                     }
                 }.start();
 
-                Toast.makeText(this, "提醒已設定，將在 " + delay / 1000 + " 秒後觸發", Toast.LENGTH_SHORT).show();
+                // 格式化觸發時間
+                String formattedTime = dateTimeFormat.format(new Date(triggerTime));
+                Toast.makeText(this, "提醒已設定，將在 " + formattedTime + " 提醒", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "無法設定過去的時間提醒", Toast.LENGTH_SHORT).show();
             }
