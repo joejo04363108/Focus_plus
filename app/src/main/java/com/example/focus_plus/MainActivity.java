@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Runnable timeUpdater;
     private FloatingActionButton fab;
-    private Button b2;
+    private Button b1,b2;
     private RecyclerView recyclerView;
 
     private NoteAdapter noteAdapter;
@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         timeTextView = findViewById(R.id.timeTextView);
         dateTextView = findViewById(R.id.dateTextView);
         fab = findViewById(R.id.fab);
+        b1 = findViewById(R.id.class_btn);
         b2 = findViewById(R.id.note_btn);
         recyclerView = findViewById(R.id.recyclerView);
 
@@ -65,6 +66,14 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         handler.post(timeUpdater);
+
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cur = new Intent(MainActivity.this, curriculum.class);
+                startActivity(cur);
+            }
+        });
 
         b2.setOnClickListener(new View.OnClickListener() {
             @Override
