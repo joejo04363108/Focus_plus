@@ -2,43 +2,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:elevation="2dp"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:background="#FFFFFF"
-    android:elevation="2dp">
+    android:padding="8dp">
 
     <!-- 標題 -->
     <TextView
         android:id="@+id/note_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
         android:text="標題"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="4dp" />
+        android:textStyle="bold" />
 
     <!-- 類別 -->
     <TextView
         android:id="@+id/note_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
         android:text="類別"
-        android:textColor="#FF6200EE"
-        android:paddingBottom="4dp" />
+        android:textColor="#FF6200EE" />
 
     <!-- 日期/時間 -->
     <TextView
         android:id="@+id/note_date_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="期限/時間"
-        android:paddingBottom="4dp" />
+        android:paddingBottom="4dp"
+        android:text="期限/時間" />
 
     <!-- 內容 -->
     <TextView
         android:id="@+id/note_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="內容"
-        android:paddingBottom="4dp" />
+        android:paddingBottom="4dp"
+        android:text="內容" />
 </LinearLayout>
