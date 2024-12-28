@@ -16,7 +16,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="413dp"
         android:layout_height="164dp"
-        android:background="@drawable/btn_background"
+
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,8 +30,8 @@
             android:text="Time will display here"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@color/white"
-            android:textSize="48sp" />
+            android:textColor="@color/black"
+            android:textSize="72sp" />
 
         <TextView
             android:id="@+id/dateTextView"
@@ -40,48 +40,137 @@
             android:text="Date will display here"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textColor="@color/black"
+            android:textSize="30sp" />
 
     </LinearLayout>
 
     <!-- Time TextView -->
 
     <!-- Two TextViews in Vertical Layout -->
+    <!-- 課程狀態區域 -->
     <LinearLayout
-        android:id="@+id/textViewLayout"
-        android:layout_width="414dp"
-        android:layout_height="101dp"
+        android:id="@+id/courseStatusLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:id="@+id/textView5"
+        <!-- 當前課程 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/textView6"
+            <!-- 當前課程標籤 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="#595959"
+                app:cardCornerRadius="8dp">
+
+                <TextView
+                    android:id="@+id/currentCourseLabel"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="當前課程"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 當前課程名稱 -->
+            <TextView
+                android:id="@+id/currentCourseTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="20dp"
+                android:text="當前課程名稱或狀態"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+        </LinearLayout>
+
+
+        <!-- 下一節課程 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <!-- 下一節課程標籤 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="#595959"
+                app:cardCornerRadius="8dp">
+
+                <TextView
+                    android:id="@+id/nextCourseLabel"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="下節課程"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 下一節課程名稱 -->
+            <TextView
+                android:id="@+id/nextCourseTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="20dp"
+                android:text="下一堂課程名稱或狀態"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <androidx.cardview.widget.CardView
         android:layout_width="0dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="48dp"
-        android:background="@drawable/recyclerview_bg"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="160dp"
+        app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="#595959"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewLayout" />
+        app:layout_constraintTop_toBottomOf="@id/courseStatusLayout">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="316dp" />
+    </androidx.cardview.widget.CardView>
+
 
     <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -92,6 +181,7 @@
         android:layout_marginBottom="120dp"
         android:clickable="true"
         android:src="@drawable/ic_tomato"
+        app:backgroundTint="#F5F5DC"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -112,7 +202,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/theme_gray"
-            android:text="Button" />
+            android:text="課表系統"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/note_btn"
@@ -120,7 +211,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="@color/theme_gray"
-            android:text="@string/Note_btn" />
+            android:text="代辦清單"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- ImageView -->
