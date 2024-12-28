@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- 宣告必要的權限 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -15,12 +14,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Focus_plus"
         tools:targetApi="31">
-
+        <activity
+            android:name=".TimerActivity"
+            android:exported="false" />
         <!-- 註冊 Receiver -->
         <receiver
             android:name=".ReminderReceiver"
             android:exported="false" /> <!-- exported 設為 false 增加安全性 -->
-
         <!-- 註冊 Activity -->
         <activity
             android:name=".tomato"
@@ -36,10 +36,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

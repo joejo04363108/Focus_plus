@@ -14,4 +14,41 @@
         <item>工作</item>
     </string-array>
 
+    <string name="app_name_tomato">Pomodoro</string>
+    <string-array name="cycle_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="focus_time_array">
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>35</item>
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+        <item>55</item>
+        <item>60</item>
+    </string-array>
+    <string-array name="break_time_array">
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+    </string-array>
+    <string-array name="music_options">
+        <item>輕音樂</item>
+        <item>鋼琴音樂</item>
+        <item>白噪音</item>
+        <item>無音樂</item>
+    </string-array>
+
 </resources>
