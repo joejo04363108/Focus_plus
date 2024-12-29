@@ -1,5 +1,8 @@
 package com.example.focus_plus;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -176,11 +179,102 @@ public class MainActivity extends AppCompatActivity {
             nextCourseTextView.setText("本日已無課程");
         }
     }
+/*
+    private void updateCourseStatus() {
+        // 獲取當前時間
+        Calendar calendar = Calendar.getInstance();
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = calendar.get(Calendar.MINUTE);
 
+        // 將星期調整為 Monday = 0, Sunday = 6
+        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int adjustedDayOfWeek = (currentDayOfWeek + 5) % 7;
 
+        // 判斷當前時間屬於哪一節
+        int currentPeriod = -1; // 預設為非課堂時間
+        if (currentHour >= 8 && currentHour < 9) {
+            currentPeriod = 0;
+        } else if (currentHour >= 9 && currentHour < 10) {
+            currentPeriod = 1;
+        } else if (currentHour >= 10 && currentHour < 11) {
+            currentPeriod = 2;
+        } else if (currentHour >= 11 && currentHour < 12) {
+            currentPeriod = 3;
+        } else if (currentHour >= 13 && currentHour < 14) {
+            currentPeriod = 4;
+        } else if (currentHour >= 14 && currentHour < 15) {
+            currentPeriod = 5;
+        } else if (currentHour >= 15 && currentHour < 16) {
+            currentPeriod = 6;
+        } else if (currentHour >= 16 && currentHour < 17) {
+            currentPeriod = 7;
+        } else if (currentHour >= 17 && currentHour < 18) {
+            currentPeriod = 8;
+        }
 
+        Log.d("MainActivity", "當前時間: " + currentHour + ":" + currentMinute +
+                ", 星期: " + adjustedDayOfWeek + ", 節次: " + currentPeriod);
 
+        // 確認是否有課程
+        Course currentCourse = null;
+        for (Course course : courseList) {
+            if (course.dayOfWeek == adjustedDayOfWeek && course.startPeriod == currentPeriod) {
+                currentCourse = course;
+                break;
+            }
+        }
 
+        if (currentCourse != null) {
+            currentCourseTextView.setText(currentCourse.courseName);
+            setReminderForCourse(currentCourse);
+        } else {
+            currentCourseTextView.setText("當前無課程");
+        }
+    }*/
+
+    private void setReminderForCourse(Course course) {
+
+        int hour = 0, minute = 50;
+        switch (course.startPeriod) {
+            case 0: hour = 7; break;
+            case 1: hour = 8; break;
+            case 2: hour = 9; break;
+            case 3: hour = 10; break;
+            case 4: hour = 12; break;
+            case 5: hour = 13; break;
+            case 6: hour = 14; break;
+            case 7: hour = 15; break;
+            case 8: hour = 16; break;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+
+        long triggerAtMillis = calendar.getTimeInMillis();
+        if (triggerAtMillis > System.currentTimeMillis()) {
+            scheduleNotification(course, triggerAtMillis);
+        } else {
+            Log.d("MainActivity", "提醒時間已過，不設定通知");
+        }
+    }
+
+    private void scheduleNotification(Course course, long triggerAtMillis) {
+        Intent intent = new Intent(this, ReminderReceiver.class);
+        intent.putExtra("reminderType", "course"); // 指定為課程提醒
+        intent.putExtra("title", course.courseName);
+        intent.putExtra("type", course.location); // 傳遞地點作為通知內容
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, course.courseName.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
+            Log.d("MainActivity", "已設定提醒: " + course.courseName + " @ " + course.location);
+        }
+    }
 
     @Override
     protected void onDestroy() {
@@ -196,7 +290,6 @@ public class MainActivity extends AppCompatActivity {
         // 更新課程狀態
         updateCourseStatus();
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -273,18 +366,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     static class Course {
         String courseName;
+        String location; // 地點
         int dayOfWeek;
         int startPeriod;
         int endPeriod;
 
-        public Course(String courseName, int dayOfWeek, int startPeriod, int endPeriod) {
+        public Course(String courseName, String location, int dayOfWeek, int startPeriod, int endPeriod) {
             this.courseName = courseName;
+            this.location = location;
             this.dayOfWeek = dayOfWeek;
             this.startPeriod = startPeriod;
             this.endPeriod = endPeriod;
         }
     }
+
 }
