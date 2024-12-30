@@ -179,58 +179,6 @@ public class MainActivity extends AppCompatActivity {
             nextCourseTextView.setText("本日已無課程");
         }
     }
-/*
-    private void updateCourseStatus() {
-        // 獲取當前時間
-        Calendar calendar = Calendar.getInstance();
-        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-        int currentMinute = calendar.get(Calendar.MINUTE);
-
-        // 將星期調整為 Monday = 0, Sunday = 6
-        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        int adjustedDayOfWeek = (currentDayOfWeek + 5) % 7;
-
-        // 判斷當前時間屬於哪一節
-        int currentPeriod = -1; // 預設為非課堂時間
-        if (currentHour >= 8 && currentHour < 9) {
-            currentPeriod = 0;
-        } else if (currentHour >= 9 && currentHour < 10) {
-            currentPeriod = 1;
-        } else if (currentHour >= 10 && currentHour < 11) {
-            currentPeriod = 2;
-        } else if (currentHour >= 11 && currentHour < 12) {
-            currentPeriod = 3;
-        } else if (currentHour >= 13 && currentHour < 14) {
-            currentPeriod = 4;
-        } else if (currentHour >= 14 && currentHour < 15) {
-            currentPeriod = 5;
-        } else if (currentHour >= 15 && currentHour < 16) {
-            currentPeriod = 6;
-        } else if (currentHour >= 16 && currentHour < 17) {
-            currentPeriod = 7;
-        } else if (currentHour >= 17 && currentHour < 18) {
-            currentPeriod = 8;
-        }
-
-        Log.d("MainActivity", "當前時間: " + currentHour + ":" + currentMinute +
-                ", 星期: " + adjustedDayOfWeek + ", 節次: " + currentPeriod);
-
-        // 確認是否有課程
-        Course currentCourse = null;
-        for (Course course : courseList) {
-            if (course.dayOfWeek == adjustedDayOfWeek && course.startPeriod == currentPeriod) {
-                currentCourse = course;
-                break;
-            }
-        }
-
-        if (currentCourse != null) {
-            currentCourseTextView.setText(currentCourse.courseName);
-            setReminderForCourse(currentCourse);
-        } else {
-            currentCourseTextView.setText("當前無課程");
-        }
-    }*/
 
     private void setReminderForCourse(Course course) {
 
